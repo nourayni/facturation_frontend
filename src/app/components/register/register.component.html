@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1>Inscription</h1>
+        <p>{{message}}</p>
+        <form [formGroup]="registerForm" (ngSubmit)="register()">
+            <div>
+                <label for="username">Nom</label>
+                <input type="text" id="username" formControlName="username" required>
+                @if (hasError('username', 'required') || hasError('username', 'minlength')) {
+                    <div class="error-message">
+                        {{ getErrorMessage('username') }}
+                    </div>
+                }
+            </div>
+
+            <div>
+                <label for="password">password</label>
+                <input type="password" id="password" formControlName="password" required>
+                @if (hasError('password', 'required') || hasError('password', 'minlength')) {
+                    <div class="error-message">
+                        {{ getErrorMessage('password') }}
+                    </div>
+                }
+            </div>
+            
+            <div>
+                <button type="submit" [disabled]="registerForm.invalid">S'inscrire</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

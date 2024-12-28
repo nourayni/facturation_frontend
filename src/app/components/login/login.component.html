@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <h1>Connexion</h1>
+        <p>{{message}}</p>
+        <form [formGroup]="loginForm" (ngSubmit)="login()">
+            <div>
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" formControlName="username" id="username">
+                @if(hasError('username', 'required') || hasError('username', 'minlength')) {
+                    <div>
+                        {{ getErrorMessage('username') }}
+                    </div>
+                }
+            </div>
+
+            <div>
+                <label for="password">Mot de passe</label>
+                <input type="password" formControlName="password" id="password">
+                @if (hasError('password', 'required') || hasError('password', 'minlength')) {
+                    <div>
+                        {{ getErrorMessage('password') }}
+                    </div>
+                }
+            </div>
+            <div>
+                <button type="submit" [disabled]="loginForm.invalid">Se connecter</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
