@@ -1,96 +1,111 @@
-import { HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { environnement } from '../../environnement/environnement';
 import { inject } from '@angular/core';
 import { StorageService } from '../service/storage.service';
-import { catchError, map, Observable, switchMap, throwError, of } from 'rxjs';
+import { catchError, switchMap, Observable, throwError, BehaviorSubject, filter, take } from 'rxjs';
 import { LoginResponse } from '../classes/interfaces';
 
 const END_POINT = environnement.api_url;
-let isRefreshingToken = false;
+
+// Subject pour éviter les appels multiples de refresh token
+let isRefreshing = false;
+const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(StorageService);
   const http = inject(HttpClient);
 
-  // Ne pas intercepter les requêtes d'authentification
+  // Ignorer les requêtes d'authentification
   if (req.url.includes('/auth/login') || req.url.includes('/auth/refresh')) {
     return next(req);
   }
 
   const accessToken = storage.getAccessToken();
-
-  if (!accessToken) {
-    // Si pas de token, rediriger vers login
-    storage.logout();
-    window.location.href = '/login';
-    return next(req);
+  
+  if (accessToken) {
+    const clonedReq = addTokenToRequest(req, accessToken);
+    
+    return next(clonedReq).pipe(
+      catchError((error) => {
+        if (error instanceof HttpErrorResponse && error.status === 401) {
+          return handleUnauthorizedError(req, next, http, storage);
+        }
+        return throwError(() => error);
+      })
+    );
   }
 
-  // Cloner la requête avec le token
-  const clonedReq = req.clone({
-    headers: req.headers.set('Authorization', `Bearer ${accessToken}`)
-  });
+  return next(req);
+};
 
-  return next(clonedReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      // Si erreur 401 et pas déjà en train de rafraîchir
-      if (error.status === 401 && !isRefreshingToken) {
-        isRefreshingToken = true;
-        
-        return refreshToken(http, storage).pipe(
-          switchMap((success: boolean) => {
-            isRefreshingToken = false;
-            
-            if (success) {
-              // Récupérer le nouveau token
-              const newToken = storage.getAccessToken();
-              // Réessayer la requête avec le nouveau token
-              const updatedReq = req.clone({
-                headers: req.headers.set('Authorization', `Bearer ${newToken}`)
-              });
-              return next(updatedReq);
-            } else {
-              // En cas d'échec du refresh
-              storage.logout();
-              window.location.href = '/login';
-              return throwError(() => new Error('Session expirée'));
-            }
-          }),
-          catchError((refreshError) => {
-            isRefreshingToken = false;
-            storage.logout();
-            window.location.href = '/login';
-            return throwError(() => refreshError);
-          })
-        );
-      }
+// Correction du typage pour HttpRequest au lieu de Request
+function addTokenToRequest(request: HttpRequest<any>, token: string): HttpRequest<any> {
+  return request.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
+function handleUnauthorizedError(
+  request: HttpRequest<any>, 
+  next: any, 
+  http: HttpClient, 
+  storage: StorageService
+): Observable<any> {
+  if (isRefreshing) {
+    return refreshTokenSubject.pipe(
+      filter(token => token !== null),
+      take(1),
+      switchMap(token => {
+        if (!token) {
+          return throwError(() => new Error('No token available'));
+        }
+        return next(addTokenToRequest(request, token));
+      })
+    );
+  }
+
+  isRefreshing = true;
+  refreshTokenSubject.next(null);
+
+  return refreshToken(http, storage).pipe(
+    switchMap((newToken: string) => {
+      isRefreshing = false;
+      refreshTokenSubject.next(newToken);
       
-      // Pour les autres erreurs
+      return next(addTokenToRequest(request, newToken));
+    }),
+    catchError((error) => {
+      isRefreshing = false;
+      refreshTokenSubject.next(null);
+      storage.logout();
+      window.location.href = '/login';
       return throwError(() => error);
     })
   );
-};
+}
 
-function refreshToken(http: HttpClient, storage: StorageService): Observable<boolean> {
+function refreshToken(http: HttpClient, storage: StorageService): Observable<string> {
   const refreshToken = storage.getRefreshToken();
   
   if (!refreshToken) {
-    return of(false);
+    return throwError(() => new Error('No refresh token available'));
   }
 
-  return http.post<LoginResponse>(
-    `${END_POINT}/auth/refresh`,
-    { token: refreshToken }
-  ).pipe(
-    map((response: LoginResponse) => {
-      if (response && response.token) {
-        storage.saveToken(response);
-        return true;
-      }
-      return false;
+  return http.post<LoginResponse>(`${END_POINT}/auth/refresh`, { 
+    token: refreshToken 
+  }).pipe(
+    switchMap((response: LoginResponse) => {
+      storage.saveToken(response);
+      return new Observable<string>(observer => {
+        observer.next(response.token);
+        observer.complete();
+      });
     }),
-    catchError(() => {
-      return of(false);
+    catchError((error) => {
+      console.error('Error refreshing token:', error);
+      return throwError(() => new Error('Failed to refresh token'));
     })
   );
 }

@@ -6,9 +6,27 @@
     <title>Document</title>
 </head>
 <body>
+    <p><a href="facture">ajouter une facture</a></p>
     <div>
+        <form [formGroup]="productForm" (ngSubmit)="save_product()">
+            <div>
+                <label for="nomProduct"> nom du produit</label>
+                <input type="text" formControlName="nomProduct" id="nomProduct">
+            </div>
+            <div>
+                <label for="price">prix</label>
+                <input type="number" formControlName="price" id="price">
+            </div>
+            <div>
+                <button type="submit" [disabled]="productForm.invalid">ajouter</button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <h1>Liste des produits</h1>
+        <button>Ajouter un produit</button>
         @for (product of products; track $index) {
-            <app-product-item [product]="product"></app-product-item>
+            <app-product-item [product]="product" (deleteProduct)="deleteProduct($event)"></app-product-item>
         }
     </div>
 </body>

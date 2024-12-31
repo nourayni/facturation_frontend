@@ -30,3 +30,30 @@ export interface ProductResponse{
     createdAt:Date;
     updatedAt:Date;
 }
+
+export interface ProductRequest{
+    nomProduct:string;
+    price:number;
+}
+
+export interface LigneFacturationDto {
+    product: ProductResponse;
+    quantity: number;
+    price: number;
+}
+
+export interface FacturationDto {
+    clientName: string;
+    clientPhoneNumber: string;
+    lignesFacturation: LigneFacturationDto[];
+}
+
+export interface FacturationResponse {
+    id: string;
+    clientName: string;
+    clientPhoneNumber: string;
+    lignesFacturation: LigneFacturationDto[];
+    totalAmount: number;
+    createdAt: string;
+    updatedAt: string;
+}
