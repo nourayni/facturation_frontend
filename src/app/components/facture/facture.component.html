@@ -4,130 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
 </head>
-<body>
-    <h1>Facturation</h1>
-    <div>
-        <form [formGroup]="facturationForm" (ngSubmit)="onSubmit()" class="p-4">
-            <!-- Section Client -->
-            <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2">
-                Nom du client
-              </label>
-              <input 
-                type="text" 
-                formControlName="clientName"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-              >
-              @if (facturationForm.get('clientName')?.hasError('required') && 
-                   facturationForm.get('clientName')?.touched) {
-                <span class="text-red-500 text-sm">
-                  Nom du client requis
-                </span>
-              }
-            </div>
-          
-            <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2">
-                Téléphone
-              </label>
-              <input 
-                type="text" 
-                formControlName="clientPhoneNumber"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-              >
-              @if (facturationForm.get('clientPhoneNumber')?.hasError('pattern') && 
-                   facturationForm.get('clientPhoneNumber')?.touched) {
-                <span class="text-red-500 text-sm">
-                  Format de téléphone invalide
-                </span>
-              }
-            </div>
-          
-            <!-- Section Lignes de Facturation -->
-            <div formArrayName="lignesFacturation" class="mb-6">
-              @for (ligne of ligneFacturation.controls; track ligne; let i = $index) {
-                <div [formGroupName]="i" class="flex gap-4 mb-4 items-center">
-                  <!-- Sélection du Produit -->
-                  <div class="flex-grow">
+<body class="bg-green-100 p-8">
+    <div class="container mx-auto flex gap-8">
+        <!-- Formulaire à gauche -->
+        <div class="w-1/2 bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold mb-4">Facturation</h1>
+            <form [formGroup]="facturationForm" (ngSubmit)="onSubmit()">
+                <!-- Section Client -->
+                <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">
-                      Produit
+                        Nom du client
                     </label>
-                    <select
-                      formControlName="product"
-                      (change)="onProductSelected(i, $event)"
-                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                    <input
+                        type="text"
+                        formControlName="clientName"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
                     >
-                      <option value="">Sélectionner un produit</option>
-                      @for (product of products; track product.id) {
-                        <option [ngValue]="product">
-                          {{product.nomProduct}} - {{product.price}}€
-                        </option>
-                      }
-                    </select>
-                  </div>
-          
-                  <!-- Quantité -->
-                  <div class="w-32">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                      Quantité
-                    </label>
-                    <input 
-                      type="number" 
-                      formControlName="quantity"
-                      min="1"
-                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    >
-                  </div>
-          
-                  <!-- Bouton Supprimer -->
-                  <button 
-                    type="button"
-                    (click)="removeLigneFacturation(i)"
-                    class="h-10 w-10 rounded-full bg-red-500 text-white hover:bg-red-600 flex items-center justify-center mt-6"
-                  >
-                    <span class="text-xl">&times;</span>
-                  </button>
+                    @if (facturationForm.get('clientName')?.hasError('required') &&
+                        facturationForm.get('clientName')?.touched) {
+                        <span class="text-red-500 text-sm">
+                            Nom du client requis
+                        </span>
+                    }
                 </div>
-              }
-            </div>
-          
-            <!-- Boutons d'Action -->
-            <div class="flex gap-4">
-              <button 
-                type="button"
-                (click)="addLigneFacturation()"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Ajouter une ligne
-              </button>
-          
-              <button 
-                type="submit"
-                [disabled]="facturationForm.invalid || isSubmitted"
-                class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {{isSubmitted ? 'Création...' : 'Créer la facturation'}}
-              </button>
-            </div>
-          
-            <!-- Message d'erreur -->
-            @if (errorMessage) {
-              <div class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                {{errorMessage}}
-              </div>
-            }
-          </form>
-    </div>
 
-    <div>
-        @for (facture of factures; track $index) {
-            <p>{{facture.id}}</p>
-            <p>{{facture.clientName}}</p>
-            <p>{{facture.clientPhoneNumber}}</p>
-            <p>{{facture.totalAmount}}</p>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Téléphone
+                    </label>
+                    <input
+                        type="text"
+                        formControlName="clientPhoneNumber"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                    >
+                    @if (facturationForm.get('clientPhoneNumber')?.hasError('pattern') &&
+                        facturationForm.get('clientPhoneNumber')?.touched) {
+                        <span class="text-red-500 text-sm">
+                            Format de téléphone invalide
+                        </span>
+                    }
+                </div>
 
-        }
+                <!-- Section Lignes de Facturation -->
+                <div formArrayName="lignesFacturation" class="mb-6">
+                    @for (ligne of lignesFacturation.controls; track ligne; let i = $index) {
+                        <div [formGroupName]="i" class="flex gap-4 mb-4 items-center">
+                            <!-- Sélection du Produit -->
+                            <div class="flex-grow">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">
+                                    Produit
+                                </label>
+                                <select
+                                    formControlName="product"
+                                    (change)="onProductSelected(i, $event)"
+                                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                >
+                                    <option value="">Sélectionner un produit</option>
+                                    @for (product of products; track product.id) {
+                                        <option [ngValue]="product">
+                                            {{product.nomProduct}} - {{product.price}}€
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Quantité -->
+                            <div class="w-32">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">
+                                    Quantité
+                                </label>
+                                <input
+                                    type="number"
+                                    formControlName="quantity"
+                                    min="1"
+                                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                >
+                            </div>
+
+                            <!-- Bouton Supprimer -->
+                            <button
+                                type="button"
+                                (click)="removeLigneFacturation(i)"
+                                class="h-10 w-10 rounded-full bg-red-500 text-white hover:bg-red-600 flex items-center justify-center mt-6"
+                            >
+                                <span class="text-xl">&times;</span>
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <!-- Boutons d'Action -->
+                <div class="flex gap-4">
+                    <button
+                        type="button"
+                        (click)="addLigneFacturation()"
+                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    >
+                        Ajouter une ligne
+                    </button>
+
+                    <button
+                        type="submit"
+                        [disabled]="facturationForm.invalid || isSubmitted"
+                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {{isSubmitted ? 'Création...' : 'Créer la facturation'}}
+                    </button>
+                </div>
+
+                <!-- Message d'erreur -->
+                @if (errorMessage) {
+                    <div class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        {{errorMessage}}
+                    </div>
+                }
+            </form>
+            <div>
+                <p>la date de {{date | date: 'yyyy-MM-dd'}}</p>
+                <form [formGroup]="dateForm" (click)="onTodayFactures()">
+                    <input type="date" class="form-control" formControlName="date" />
+                    <button>rechercher</button>
+                </form>
+                <p>nombre de facture de la journee du {{date | date: 'yyyy-MM-dd'}} {{factureResponseOndays.length}}</p>
+                @for (facOnDay of factureResponseOndays; track $index) {
+
+                }
+            </div>
+        </div>
+
+        <!-- Liste des factures à droite -->
+        <div class="w-1/2 bg-white p-6 rounded-lg shadow-lg">
+            <div>
+                <form [formGroup]="searchForm" (click)="getFacturePaginated()">
+                    <input type="text" class="form-control" formControlName="search" placeholder="rechercher" />
+                    <button>rechercher</button>
+                </form>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Liste des Factures</h2>
+            <div>
+                @for (facture of facturesResponse; track $index) {
+                    <app-facture-item
+                    [facture]="facture"
+                    (edit)="onEdit($event)"
+                    (delete)="onDelete($event)"
+                    (detail)="onDetail($event)">
+                    </app-facture-item>
+                }
+                <div class="flex justify-between mt-4">
+                    <button 
+                    (click)="previousPage()" [disabled]="page === 0" 
+                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                    precedent
+                    </button>
+                    <button 
+                    (click)="nextPage()" [disabled]="page === totalPages - 1" 
+                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                    suivant
+                </button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

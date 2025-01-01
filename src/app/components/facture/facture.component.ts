@@ -3,12 +3,16 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { FactureService } from '../../service/facture.service';
 import { ProductService } from '../../service/product.service';
 import { FacturationDto, FacturationResponse, ProductResponse } from '../../classes/interfaces';
+import { FactureItemComponent } from "../facture-item/facture-item.component";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-facture',
   imports: [
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule,
+    FactureItemComponent,
+    CommonModule,
+],
   templateUrl: './facture.component.html',
   styleUrl: './facture.component.css'
 })
@@ -19,23 +23,81 @@ export class FactureComponent implements OnInit {
   errorMessage: string = ''
   products: ProductResponse[] = []
   factures: FacturationResponse[] = []
+  
+
+  page: number = 0
+  size:number = 4
+  sorted:string = 'createdAt'
+  direction:string = 'desc'
+
+  totalElements: number = 0
+  totalPages:number = 0
+
+  facturesResponse: FacturationResponse[] = []
+
+  factureResponseOndays: FacturationResponse[] = []
+
+  searchForm!: FormGroup
+  search: string = ''
+
+  dateForm!: FormGroup
+  date: Date = new Date()
 
   constructor(private factureService: FactureService,
     private productService: ProductService,
     private fb: FormBuilder
   ) {
     this.initForm()
+    this.searchForm = this.fb.group({
+      search: ['']
+    })
+    this.dateForm = this.fb.group({
+      date: [null]
+    })
   }
 
   ngOnInit(): void {
     this.loadProducts();
     this.loadFactures();
+    this.getFacturePaginated();
+    this.onTodayFactures();
   }
+
+  getFacturePaginated():void{
+    this.search = this.searchForm.value.search
+    this.factureService.getFacturationPaginated(this.page, this.size, this.sorted, this.direction,this.search).subscribe({
+      next: ((response: any) => {
+        console.log(response)
+        this.facturesResponse = response.content
+        this.totalElements = response.totalElements
+        this.totalPages = response.totalPages
+      }),
+      error: ((err) => {
+        console.log(err.message)
+        console.error(err)
+      })
+    })
+  }
+
+  nextPage(): void {
+    if (this.page < this.totalPages - 1) {
+      this.page++;
+      this.getFacturePaginated();
+    }
+  }
+
+  previousPage(): void {
+    if (this.page > 0) {
+      this.page--;
+      this.getFacturePaginated();
+    }
+  }
+
 
   private initForm(): void {
     this.facturationForm = this.fb.group({
-      clientName: [''],
-      clientPhoneNumber: [''],
+      clientName: ['',[Validators.required, Validators.minLength(3)]],
+      clientPhoneNumber: ['',[Validators.required]],
       // declarer une liste de ligne facturation vide dans le formulaire
       lignesFacturation: this.fb.array([])
     })
@@ -53,13 +115,13 @@ export class FactureComponent implements OnInit {
     })
   }
   // recuperer les lignes de facturation
-  get ligneFacturation(): FormArray {
+  get lignesFacturation(): FormArray {
     return this.facturationForm.get('lignesFacturation') as FormArray
   }
 
   // ajouter une ligne de facturation dans la liste de ligne de facturation
   addLigneFacturation(): void {
-    this.ligneFacturation.push(this.fb.group({
+    this.lignesFacturation.push(this.fb.group({
       product: [null, Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]],
     }))
@@ -67,24 +129,19 @@ export class FactureComponent implements OnInit {
 
   removeLigneFacturation(index: number): void {
     // Vérifier si l'index est valide
-    if (index < 0 || index >= this.ligneFacturation.length) {
+    if (index < 0 || index >= this.lignesFacturation.length) {
       console.error('Index invalide pour la suppression de ligne');
       return;
     }
 
     // Supprimer la ligne du FormArray
-    this.ligneFacturation.removeAt(index);
+    this.lignesFacturation.removeAt(index);
 
-    // Si c'était la dernière ligne, on peut vouloir ajouter une ligne vide
-    // ou afficher un message (selon les besoins)
-    if (this.ligneFacturation.length === 0) {
+    if (this.lignesFacturation.length === 0) {
       // Optionnel : ajouter automatiquement une nouvelle ligne vide
-      // this.addLigneFacturation();
+      this.addLigneFacturation();
       console.log('Toutes les lignes ont été supprimées');
     }
-
-    // Optionnel : recalculer les totaux ou mettre à jour d'autres éléments
-    // this.updateTotals();
   }
 
   //
@@ -93,7 +150,7 @@ export class FactureComponent implements OnInit {
     const selectedproduct = this.products.find(product => product.id === event.target.value);
     if(selectedproduct){
       // mettre a jour le produit selectionne dans la ligne de facturation
-      this.ligneFacturation.at(index).patchValue({
+      this.lignesFacturation.at(index).patchValue({
         product: selectedproduct
       })
     }
@@ -115,8 +172,9 @@ export class FactureComponent implements OnInit {
         console.log(response)
         this.facturationForm.reset()
         // vider la liste des lignes de facturation
-        this.ligneFacturation.clear()
+        this.lignesFacturation.clear()
         this.isSubmitted = false
+        this.getFacturePaginated();
       }),
       error:((err)=>{
         this.errorMessage = err.error.message
@@ -129,12 +187,50 @@ export class FactureComponent implements OnInit {
     this.factureService.getFacturationList().subscribe({
       next:((response)=>{
         this.factures = response
-        console.log(this.factures)
+        //console.log(this.factures)
       }),
       error:((err)=>{
         console.error(err)
       })
     })
+  }
+  onTodayFactures(): void {
+    if(this.dateForm.value.date!=null) {
+      this.date = new Date(this.dateForm.value.date)
+    }else {
+      this.date = new Date()
+    }
+    const formattedDate = this.date.toISOString().split('T')[0];
+    this.factureService.getfactureOnday(formattedDate).subscribe({
+      next:((response)=>{
+        this.factureResponseOndays = response
+        console.log(this.factureResponseOndays)
+      }),
+      error:((err)=>{
+        console.error(err)
+      })
+    })
+  }
+  
+
+
+
+
+
+  // --------------------------------------
+  onEdit(facture: FacturationResponse): void {
+    console.log('Edit facture:', facture);
+    // Logique pour éditer la facture
+  }
+
+  onDelete(facture: FacturationResponse): void {
+    console.log('Delete facture:', facture);
+    // Logique pour supprimer la facture
+  }
+
+  onDetail(facture: FacturationResponse): void {
+    console.log('Detail facture:', facture);
+    // Logique pour afficher les détails de la facture
   }
 
 

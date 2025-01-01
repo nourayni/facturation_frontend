@@ -4,30 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <p><a href="facture">ajouter une facture</a></p>
-    <div>
-        <form [formGroup]="productForm" (ngSubmit)="save_product()">
-            <div>
-                <label for="nomProduct"> nom du produit</label>
-                <input type="text" formControlName="nomProduct" id="nomProduct">
+<body class="bg-green-100 p-8">
+    <div class="container mx-auto flex flex-col gap-8">
+        <!-- Bouton pour ajouter une facture -->
+        <div class="flex justify-end mb-4">
+            <button  class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                <a href="facture">ajouter une facture</a>
+            </button>
+        </div>
+
+        <!-- Conteneur principal pour le formulaire et la liste des produits -->
+        <div class="flex w-full gap-8">
+            <!-- Formulaire d'ajout de produit à gauche -->
+            <div class="w-full bg-white p-6 rounded-lg shadow-lg">
+                <h1 class="text-2xl font-bold mb-4">Ajouter un produit</h1>
+                <form [formGroup]="productForm" (ngSubmit)="save_product()">
+                    <div class="mb-4">
+                        <label for="nomProduct" class="block text-gray-700 text-sm font-bold mb-2">Nom du produit</label>
+                        <input type="text" formControlName="nomProduct" id="nomProduct" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="price" class="block text-gray-700 text-sm font-bold mb-2">Prix</label>
+                        <input type="number" formControlName="price" id="price" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <button type="submit" [disabled]="productForm.invalid" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">Ajouter</button>
+                    </div>
+                </form>
             </div>
-            <div>
-                <label for="price">prix</label>
-                <input type="number" formControlName="price" id="price">
+
+            <!-- Liste des produits à droite -->
+            <div class="w-full bg-white p-6 rounded-lg shadow-lg">
+                <h1 class="text-2xl font-bold mb-4">Liste des produits</h1>
+                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 mb-4">Ajouter un produit</button>
+                @for (product of products; track $index) {
+                    <app-product-item [product]="product" (deleteProduct)="deleteProduct($event)"></app-product-item>
+                }
+                <div class="flex justify-between mt-4">
+                    <button (click)="previousPage()" [disabled]="page === 0" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                    <button (click)="nextPage()" [disabled]="page === totalPages - 1" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+                </div>
             </div>
-            <div>
-                <button type="submit" [disabled]="productForm.invalid">ajouter</button>
-            </div>
-        </form>
-    </div>
-    <div>
-        <h1>Liste des produits</h1>
-        <button>Ajouter un produit</button>
-        @for (product of products; track $index) {
-            <app-product-item [product]="product" (deleteProduct)="deleteProduct($event)"></app-product-item>
-        }
+        </div>
     </div>
 </body>
 </html>

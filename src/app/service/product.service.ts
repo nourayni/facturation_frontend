@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environnement } from '../../environnement/environnement';
-import { ProductRequest, ProductResponse } from '../classes/interfaces';
+import { PaginatedResponse, ProductRequest, ProductResponse } from '../classes/interfaces';
 import { Observable } from 'rxjs';
 
 const end_point = environnement.api_url;
@@ -31,5 +31,14 @@ export class ProductService {
 
   new_product(product:ProductRequest):Observable<ProductResponse>{
     return this.http.post<ProductResponse>(`${end_point}/api/products`, product)
+  }
+
+  getAllproductByPageAndSort(page:number, size:number,sortBy:string, direction:string):Observable<PaginatedResponse<ProductResponse>>{
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sortBy', sortBy)
+      .set('direction', direction);
+      return this.http.get<PaginatedResponse<ProductResponse>>(`${end_point}/api/products/page/`, {params});
   }
 }
