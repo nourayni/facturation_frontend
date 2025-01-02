@@ -50,7 +50,7 @@ export interface FacturationDto {
 
 export interface FacturationResponse {
     id: string;
-    numfacture:string,
+    numFacture:string,
     clientName: string;
     clientPhoneNumber: string;
     lignesFacturation: LigneFacturationDto[];
@@ -65,4 +65,9 @@ export interface PaginatedResponse<T> {
     size: number;
     totalElements: number;
     totalPages: number;
+}
+
+export interface FactureDayResponse{
+    facturationResponseDTOs: FacturationResponse[];
+    totalAmountDay:number;
 }

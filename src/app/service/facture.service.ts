@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environnement } from '../../environnement/environnement';
-import { FacturationDto, FacturationResponse, PaginatedResponse } from '../classes/interfaces';
+import { FacturationDto, FacturationResponse, FactureDayResponse, PaginatedResponse } from '../classes/interfaces';
 import { Observable } from 'rxjs';
 
 const apiUrl = environnement.api_url;
@@ -33,13 +33,17 @@ export class FactureService {
     });
   }
 
-  getfactureOnday(date: string):Observable<FacturationResponse[]>{
+  getfactureOnday(date: string):Observable<FactureDayResponse>{
 
-    return this.http.get<FacturationResponse[]>(`${apiUrl}/facture/day`,{
+    return this.http.get<FactureDayResponse>(`${apiUrl}/facture/day`,{
       params:{
         date: date
       }
     })
+  }
+
+  factureDetail(id: string): Observable<FacturationResponse> {
+    return this.http.get<FacturationResponse>(`${apiUrl}/facture/${id}`);
   }
 
 }

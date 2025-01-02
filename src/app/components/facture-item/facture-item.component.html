@@ -1,13 +1,16 @@
 <!-- src/app/facture-item/facture-item.component.html -->
 <div class="flex items-center justify-between p-4 bg-green-50 border border-green-300 rounded-lg">
-    <div>
-      <p class="text-gray-700">{{ facture.clientName }}</p>
-      <p class="text-gray-700">{{ facture.clientPhoneNumber }}</p>
-    </div>
-    <div>
+  <div>
+      @if (facture.numFacture!=null) {
+          <p class="text-gray-700">Num: {{  facture.numFacture }}</p>
+      } @else {
+          <p class="text-gray-700">{{ facture.clientPhoneNumber }}</p>
+      }
+      <p class="text-gray-700">tel: {{ facture.clientName }}</p>
+  </div>
+  <div>
       <button class="bg-blue-500 text-white px-4 py-2 rounded mr-2" (click)="onEdit()">Éditer</button>
       <button class="bg-red-500 text-white px-4 py-2 rounded mr-2" (click)="onDelete()">Supprimer</button>
-      <button class="bg-green-500 text-white px-4 py-2 rounded" (click)="onDetail()">Détail</button>
-    </div>
+      <button class="bg-green-500 text-white px-4 py-2 rounded" [routerLink]="['/facture',facture.id]">Détail</button>
   </div>
-  
+</div>

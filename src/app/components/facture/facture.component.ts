@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FactureService } from '../../service/facture.service';
 import { ProductService } from '../../service/product.service';
-import { FacturationDto, FacturationResponse, ProductResponse } from '../../classes/interfaces';
+import { FacturationDto, FacturationResponse, FactureDayResponse, ProductResponse } from '../../classes/interfaces';
 import { FactureItemComponent } from "../facture-item/facture-item.component";
 import { CommonModule } from '@angular/common';
 
@@ -35,7 +35,7 @@ export class FactureComponent implements OnInit {
 
   facturesResponse: FacturationResponse[] = []
 
-  factureResponseOndays: FacturationResponse[] = []
+  factureResponseOndays!: FactureDayResponse
 
   searchForm!: FormGroup
   search: string = ''

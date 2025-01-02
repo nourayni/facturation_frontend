@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-product',
-  imports: [ProductItemComponent, ReactiveFormsModule, RouterLink],
+  imports: [ProductItemComponent, ReactiveFormsModule],
   templateUrl: './product.component.html',
   styleUrl: './product.component.css'
 })

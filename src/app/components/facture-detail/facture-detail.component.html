@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facture Détail</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            body {
+                background-color: white;
+                color: black;
+            }
+            .no-print {
+                display: none;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white p-8">
+    <div class="container mx-auto max-w-4xl p-6 bg-white rounded-lg shadow-lg">
+        <!-- En-tête de la facture -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCpyAWsGC1no0W-Tn-BrKpP58Ur8uaVwGnmw&s" alt="Logo" class="h-16">
+                <div class="text-gray-700">
+                    <p class="font-bold">Service</p>
+                    <p>Marche difonse, Dakar, Lamine DRAME</p>
+                    <p>(221) 787-60-71</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-gray-700">ACHETEUR:</p>
+                <p class="font-bold text-lg">{{facture.clientName}}</p>
+                <p>{{facture.clientPhoneNumber}}</p>
+            </div>
+        </div>
+
+        <!-- Informations de la facture -->
+        <div class="flex justify-between mb-6">
+            <div>
+                <p class="text-gray-700 font-bold">Invoice #{{facture.numFacture}}</p>
+                <p class="text-gray-700">Date : {{facture.createdAt | date: 'yyyy-MM-dd'}}</p>
+                <!-- <p class="text-gray-700">Due: {{facture.dueDate | date: 'yyyy-MM-dd'}}</p> -->
+            </div>
+            <div class="text-right">
+                <p class="text-gray-700 font-bold">Total</p>
+                <p class="text-2xl font-bold text-green-600">{{facture.totalAmount}} Fcfa</p>
+            </div>
+        </div>
+
+        <!-- Lignes de facturation -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">For Services Rendered</h2>
+            <table class="w-full bg-white border border-gray-300">
+                <thead>
+                    <tr class="bg-green-200 text-gray-700">
+                        <th class="py-2 px-4 border-b border-gray-300">PRODUCT / SERVICE</th>
+                        <th class="py-2 px-4 border-b border-gray-300">DESCRIPTION</th>
+                        <th class="py-2 px-4 border-b border-gray-300">QTY.</th>
+                        <th class="py-2 px-4 border-b border-gray-300">UNIT PRICE</th>
+                        <th class="py-2 px-4 border-b border-gray-300">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (ligne of facture.lignesFacturation; track $index) {
+                        <tr class="border-b border-gray-300">
+                            <td class="py-2 px-4">{{ligne.product.nomProduct}}</td>
+                            <td class="py-2 px-4">{{ligne.product.nomProduct}}</td>
+                            <td class="py-2 px-4 text-center">{{ligne.quantity}}</td>
+                            <td class="py-2 px-4 text-right">{{ligne.product.price}} Fcfa</td>
+                            <td class="py-2 px-4 text-right">{{ligne.price}} Fcfa</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Résumé de la facture -->
+        <div class="flex justify-between mb-6">
+            <div>
+                <p class="text-gray-700">Thanks for your business!</p>
+            </div>
+            <div class="text-right">
+                <p class="text-gray-700">Subtotal: {{facture.totalAmount}} Fcfa</p>
+                <p class="text-gray-700">Tax Rate (13%): {{facture.totalAmount}} Fcfa</p>
+                <p class="text-gray-700 font-bold">Total: {{facture.totalAmount}} Fcfa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton d'impression (ne sera pas imprimé) -->
+    <div class="no-print mt-8 text-center">
+        <button class="bg-blue-500 text-white px-4 py-2 rounded" onclick="window.print()">Imprimer la facture</button>
+    </div>
+</body>
+</html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-green-100 p-8">
     <div class="container mx-auto flex gap-8">
@@ -121,48 +121,51 @@
                     </div>
                 }
             </form>
-            <div>
-                <p>la date de {{date | date: 'yyyy-MM-dd'}}</p>
-                <form [formGroup]="dateForm" (click)="onTodayFactures()">
-                    <input type="date" class="form-control" formControlName="date" />
-                    <button>rechercher</button>
-                </form>
-                <p>nombre de facture de la journee du {{date | date: 'yyyy-MM-dd'}} {{factureResponseOndays.length}}</p>
-                @for (facOnDay of factureResponseOndays; track $index) {
 
-                }
+            <!-- Bilan journalier -->
+            <div class="mt-8 p-6 bg-green-200 rounded-lg shadow-lg">
+                <div class="w-full border-t border-gray-300 mb-4"></div>
+                <p class="text-gray-700 text-lg font-bold">Date : {{date | date: 'yyyy-MM-dd'}}</p>
+                <form [formGroup]="dateForm" (ngSubmit)="onTodayFactures()" class="flex gap-2 mt-4">
+                    <input type="date" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" formControlName="date" />
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Rechercher</button>
+                </form>
+                <p class="text-gray-700 mt-4 text-xl font-bold">Nombre de factures du jour : <span class="text-blue-600">{{factureResponseOndays.facturationResponseDTOs.length}}</span></p>
+                <p class="text-gray-700 text-xl font-bold">Somme totale vendue : <span class="text-green-600">{{factureResponseOndays.totalAmountDay}}</span></p>
             </div>
         </div>
 
         <!-- Liste des factures à droite -->
         <div class="w-1/2 bg-white p-6 rounded-lg shadow-lg">
-            <div>
-                <form [formGroup]="searchForm" (click)="getFacturePaginated()">
-                    <input type="text" class="form-control" formControlName="search" placeholder="rechercher" />
-                    <button>rechercher</button>
+            <div class="mb-4">
+                <form [formGroup]="searchForm" (ngSubmit)="getFacturePaginated()" class="flex gap-2">
+                    <input type="text" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" formControlName="search" placeholder="Rechercher" />
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Rechercher</button>
                 </form>
             </div>
             <h2 class="text-2xl font-bold mb-4">Liste des Factures</h2>
             <div>
                 @for (facture of facturesResponse; track $index) {
                     <app-facture-item
-                    [facture]="facture"
-                    (edit)="onEdit($event)"
-                    (delete)="onDelete($event)"
-                    (detail)="onDetail($event)">
+                        [facture]="facture"
+                        (edit)="onEdit($event)"
+                        (delete)="onDelete($event)"
+                        (detail)="onDetail($event)">
                     </app-facture-item>
                 }
                 <div class="flex justify-between mt-4">
-                    <button 
-                    (click)="previousPage()" [disabled]="page === 0" 
-                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
-                    precedent
+                    <button
+                        (click)="previousPage()" [disabled]="page === 0"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Précédent
                     </button>
-                    <button 
-                    (click)="nextPage()" [disabled]="page === totalPages - 1" 
-                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
-                    suivant
-                </button>
+                    <button
+                        (click)="nextPage()" [disabled]="page === totalPages - 1"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Suivant
+                    </button>
                 </div>
             </div>
         </div>

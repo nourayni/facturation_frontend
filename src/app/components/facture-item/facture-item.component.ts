@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FacturationResponse } from '../../classes/interfaces';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-facture-item',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './facture-item.component.html',
   styleUrl: './facture-item.component.css'
 })
@@ -22,8 +23,8 @@ export class FactureItemComponent {
     this.delete.emit(this.facture);
   }
 
-  onDetail(): void {
-    this.detail.emit(this.facture);
-  }
+  // onDetail(): void {
+  //   this.detail.emit(this.facture);
+  // }
 
 }
